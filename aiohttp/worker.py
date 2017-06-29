@@ -43,6 +43,8 @@ class GunicornWebWorker(base.Worker):
     def run(self):
         if hasattr(self.wsgi, 'startup'):
             self.loop.run_until_complete(self.wsgi.startup())
+        # freeze early
+        self.wsgi.freeze()
         self._runner = ensure_future(self._run(), loop=self.loop)
 
         try:

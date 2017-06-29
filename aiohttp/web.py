@@ -117,25 +117,22 @@ class Application(MutableMapping):
     ########
     @property
     def loop(self):
-        return self._loop
-
-    def _set_loop(self, loop):
-        if loop is None:
+        if self._loop is None:
             loop = asyncio.get_event_loop()
-        if self._loop is not None and self._loop is not loop:
-            raise RuntimeError(
-                "web.Application instance initialized with different loop")
+            if loop is None:
+                # asyncio.set_event_loop(None) was called before
+                # Python < 3.5.3 or a call from non-async context
+                raise RuntimeError
 
-        self._loop = loop
-        self._on_loop_available.send(self)
+            self._loop = loop
+            self._on_loop_available.send(self)
 
-        # set loop debug
-        if self._debug is ...:
-            self._debug = loop.get_debug()
+            # set loop debug
+            if self._debug is ...:
+                self._debug = loop.get_debug()
 
-        # set loop to sub applications
-        for subapp in self._subapps:
-            subapp._set_loop(loop)
+            self._loop = loop
+        return self._loop
 
     @property
     def frozen(self):
@@ -193,8 +190,6 @@ class Application(MutableMapping):
         self.router.register_resource(resource)
         self._reg_subapp_signals(subapp)
         self._subapps.append(subapp)
-        if self._loop is not None:
-            subapp._set_loop(self._loop)
         return resource
 
     @property
@@ -237,7 +232,6 @@ class Application(MutableMapping):
 
     def make_handler(self, *, loop=None,
                      secure_proxy_ssl_header=None, **kwargs):
-        self._set_loop(loop)
         self.freeze()
 
         kwargs['debug'] = self.debug
@@ -418,8 +412,9 @@ def run_app(app, *, host=None, port=None, path=None, sock=None,
     if loop is None:
         loop = asyncio.get_event_loop()
 
-    app._set_loop(loop)
     loop.run_until_complete(app.startup())
+    # freeze early
+    app.freeze()
 
     try:
         make_handler_kwargs = dict()

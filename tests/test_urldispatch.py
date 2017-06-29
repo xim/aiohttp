@@ -2,6 +2,7 @@ import asyncio
 import os
 import pathlib
 import re
+import sys
 from collections.abc import Container, Iterable, Mapping, MutableMapping, Sized
 from urllib.parse import unquote
 
@@ -33,7 +34,8 @@ def make_handler():
 @pytest.fixture
 def app(loop):
     app = web.Application()
-    app._set_loop(loop)
+    if sys.version_info < (3, 5, 3):
+        app._loop = loop
     return app
 
 
