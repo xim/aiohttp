@@ -63,6 +63,7 @@ Eduard Iskandarov
 Eli Ribble
 Elizabeth Leddy
 Enrique Saez
+Eric Sheng
 Erich Healy
 Eugene Chernyshov
 Eugene Naydenov
@@ -77,6 +78,7 @@ Gregory Haynes
 Günther Jena
 Hu Bo
 Hugo Herter
+Hynek Schlawack
 Igor Davydenko
 Igor Pavlov
 Ingmar Steen
@@ -104,6 +106,7 @@ Kirill Klenov
 Kirill Malovitsa
 Kyrylo Perevozchikov
 Lars P. Søndergaard
+Loïc Lajeanne
 Louis-Philippe Huberdeau
 Lu Gong
 Lubomir Gelo
@@ -136,6 +139,7 @@ Paulus Schoutsen
 Pavel Kamaev
 Pawel Miech
 Philipp A.
+Pieter van Beek
 Rafael Viotti
 Raúl Cumplido
 Required Field
@@ -157,6 +161,7 @@ Stephen Granade
 Steven Seguin
 Sunghyun Hwang
 Sviatoslav Bulbakha
+Sviatoslav Sydorenko
 Taha Jahangir
 Taras Voinarovskyi
 Terence Honles
@@ -181,6 +186,7 @@ Will McGugan
 Willem de Groot
 Wilson Ong
 Yannick Koechlin
+Yegor Roganov
 Young-Ho Cha
 Yuriy Shatrov
 Yury Selivanov

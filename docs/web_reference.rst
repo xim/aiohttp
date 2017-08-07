@@ -20,7 +20,7 @@ Servers<aiohttp-web-lowlevel>` (which have no applications, routers, signals
 and middlewares) and :class:`Request` has an *application* and *match
 info* attributes.
 
-A :class:`BaseRequest`/:class:`Request` are :obj:`dict`-like objects,
+A :class:`BaseRequest` / :class:`Request` are :obj:`dict` like objects,
 allowing them to be used for :ref:`sharing
 data<aiohttp-web-data-sharing>` among :ref:`aiohttp-web-middlewares`
 and :ref:`aiohttp-web-signals` handlers.
@@ -126,6 +126,21 @@ and :ref:`aiohttp-web-signals` handlers.
       Returns  :class:`str`, or ``None`` if no host name is found in the
       headers.
 
+   .. attribute:: remote
+
+      Originating IP address of a client initiated HTTP request.
+
+      The IP is resolved through the following headers, in this order:
+
+      - *Forwarded*
+      - *X-Forwarded-For*
+      - peer name of opened socket
+
+      Returns :class:`str`, or ``None`` if no remote IP information is
+      provided.
+
+      .. versionadded:: 2.3
+
    .. attribute:: path_qs
 
       The URL including PATH_INFO and the query string. e.g.,
@@ -193,6 +208,14 @@ and :ref:`aiohttp-web-signals` handlers.
          peername = request.transport.get_extra_info('peername')
          if peername is not None:
              host, port = peername
+
+   .. attribute:: loop
+
+      An event loop instance used by HTTP request handling.
+
+      Read-only :class:`asyncio.AbstractEventLoop` property.
+
+      .. versionadded:: 2.3
 
    .. attribute:: cookies
 
@@ -290,7 +313,7 @@ and :ref:`aiohttp-web-signals` handlers.
 
       :param rel_url: url to use, :class:`str` or :class:`~yarl.URL`
 
-      :param headers: :class:`~multidict.CIMultidict` or compatible
+      :param headers: :class:`~multidict.CIMultiDict` or compatible
                       headers container.
 
       :return: a cloned :class:`Request` instance.
@@ -569,7 +592,7 @@ StreamResponse
 
    .. attribute:: headers
 
-      :class:`~aiohttp.CIMultiiDct` instance
+      :class:`~multidict.CIMultiDict` instance
       for *outgoing* *HTTP headers*.
 
    .. attribute:: cookies
@@ -820,7 +843,8 @@ Response
 WebSocketResponse
 ^^^^^^^^^^^^^^^^^
 
-.. class:: WebSocketResponse(*, timeout=10.0, receive_timeout=None, autoclose=True, \
+.. class:: WebSocketResponse(*, timeout=10.0, receive_timeout=None, \
+                             autoclose=True, \
                              autoping=True, heartbeat=None, protocols=())
 
    Class for handling server-side websockets, inherited from
@@ -834,8 +858,8 @@ WebSocketResponse
    .. versionadded:: 1.3.0
 
    To enable back-pressure from slow websocket clients treat methods
-   `ping()`, `pong()`, `send_str()`, `send_bytes()`, `send_json()` as coroutines.
-   By default write buffer size is set to 64k.
+   `ping()`, `pong()`, `send_str()`, `send_bytes()`, `send_json()` as
+   coroutines.  By default write buffer size is set to 64k.
 
    :param bool autoping: Automatically send
                          :const:`~aiohttp.WSMsgType.PONG` on
@@ -850,12 +874,14 @@ WebSocketResponse
 
    .. versionadded:: 1.3.0
 
-   :param float heartbeat: Send `ping` message every `heartbeat` seconds
-                           and wait `pong` response, close connection if `pong` response
-                           is not received.
+   :param float heartbeat: Send `ping` message every `heartbeat`
+                           seconds and wait `pong` response, close
+                           connection if `pong` response is not
+                           received.
 
-   :param float receive_timeout: Timeout value for `receive` operations.
-                                 Default value is None (no timeout for receive operation)
+   :param float receive_timeout: Timeout value for `receive`
+                                 operations.  Default value is None
+                                 (no timeout for receive operation)
 
    .. versionadded:: 0.19
 
@@ -1157,23 +1183,36 @@ properties for later access from a :ref:`handler<aiohttp-web-handler>` via the
 Although :class:`Application` is a :obj:`dict`-like object, it can't be
 duplicated like one using :meth:`Application.copy`.
 
-.. class:: Application(*, router=None, logger=<default>, \
-                       middlewares=(), debug=False, **kwargs)
+.. class:: Application(*, logger=<default>, router=None,middlewares=(), \
+                       handler_args=None, client_max_size=1024**2, \
+                       secure_proxy_ssl_header=None, loop=None, debug=...)
 
    The class inherits :class:`dict`.
-
-   :param router: :class:`aiohttp.abc.AbstractRouter` instance, the system
-                  creates :class:`UrlDispatcher` by default if
-                  *router* is ``None``.
 
    :param logger: :class:`logging.Logger` instance for storing application logs.
 
                   By default the value is ``logging.getLogger("aiohttp.web")``
 
+   :param router: :class:`aiohttp.abc.AbstractRouter` instance, the system
+                  creates :class:`UrlDispatcher` by default if
+                  *router* is ``None``.
+
    :param middlewares: :class:`list` of middleware factories, see
                        :ref:`aiohttp-web-middlewares` for details.
 
-   :param debug: Switches debug mode.
+   :param handler_args: dict-like object that overrides keyword arguments of
+                        :meth:`Application.make_handler`
+
+   :param client_max_size: client's maximum size in a request. If a POST
+                           request exceeds this value, it raises an
+                           `HTTPRequestEntityTooLarge` exception.
+
+   :param tuple secure_proxy_ssl_header: Default: ``None``.
+
+      .. deprecated:: 2.1
+
+        See ``request.url.scheme`` for built-in resolution of the current
+        scheme using the standard and de-facto standard headers.
 
    :param loop: event loop
 
@@ -1181,6 +1220,8 @@ duplicated like one using :meth:`Application.copy`.
 
          The parameter is deprecated. Loop is get set during freeze
          stage.
+
+   :param debug: Switches debug mode.
 
    .. attribute:: router
 
@@ -1469,6 +1510,15 @@ Router is any object that implements :class:`AbstractRouter` interface.
       :param coroutine expect_handler: optional *expect* header handler.
 
       :returns: new :class:`PlainRoute` or :class:`DynamicRoute` instance.
+
+   .. method:: add_routes(routes_table)
+
+      Register route definitions from *routes_table*.
+
+      The table is a :class:`list` of :class:`RouteDef` items or
+      :class:`RouteTableDef`.
+
+      .. versionadded:: 2.3
 
    .. method:: add_get(path, handler, *, name=None, allow_head=True, **kwargs)
 
@@ -1978,6 +2028,186 @@ and *405 Method Not Allowed*.
       HTTP status reason
 
 
+.. _aiohttp-web-route-def:
+
+
+RouteDef
+^^^^^^^^
+
+Route definition, a description for not registered yet route.
+
+Could be used for filing route table by providing a list of route
+definitions (Django style).
+
+The definition is created by functions like :func:`get` or
+:func:`post`, list of definitions could be added to router by
+:meth:`UrlDispatcher.add_routes` call::
+
+   from aiohttp import web
+
+   async def handle_get(request):
+       ...
+
+
+   async def handle_post(request):
+       ...
+
+   app.router.add_routes([web.get('/get', handle_get),
+                          web.post('/post', handle_post),
+
+
+.. class:: RouteDef
+
+   A definition for not added yet route.
+
+   .. attribute:: method
+
+      HTTP method (``GET``, ``POST`` etc.)  (:class:`str`).
+
+   .. attribute:: path
+
+      Path to resource, e.g. ``/path/to``. Could contain ``{}``
+      brackets for :ref:`variable resources
+      <aiohttp-web-variable-handler>` (:class:`str`).
+
+   .. attribute:: handler
+
+      An async function to handle HTTP request.
+
+   .. attribute:: kwargs
+
+      A :class:`dict` of additional arguments.
+
+   .. versionadded:: 2.3
+
+
+.. function:: get(path, handler, *, name=None, allow_head=True, \
+              expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``GET`` requests. See
+   :meth:`UrlDispatcher.add_get` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. function:: post(path, handler, *, name=None, expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``POST`` requests. See
+   :meth:`UrlDispatcher.add_post` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. function:: head(path, handler, *, name=None, expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``HEAD`` requests. See
+   :meth:`UrlDispatcher.add_head` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. function:: put(path, handler, *, name=None, expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``PUT`` requests. See
+   :meth:`UrlDispatcher.add_put` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. function:: patch(path, handler, *, name=None, expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``PATCH`` requests. See
+   :meth:`UrlDispatcher.add_patch` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. function:: delete(path, handler, *, name=None, expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``DELETE`` requests. See
+   :meth:`UrlDispatcher.add_delete` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. function:: route(method, path, handler, *, name=None, expect_handler=None)
+
+   Return :class:`RouteDef` for processing ``POST`` requests. See
+   :meth:`UrlDispatcher.add_route` for information about parameters.
+
+   .. versionadded:: 2.3
+
+.. _aiohttp-web-route-table-def:
+
+RouteTableDef
+^^^^^^^^^^^^^
+
+A routes table definition used for describing routes by decorators
+(Flask style)::
+
+   from aiohttp import web
+
+   routes = web.RouteTableDef()
+
+   @routes.get('/get')
+   async def handle_get(request):
+       ...
+
+
+   @routes.post('/post')
+   async def handle_post(request):
+       ...
+
+   app.router.add_routes(routes)
+
+.. class:: RouteTableDef()
+
+   A sequence of :class:`RouteDef` instances (implements
+   :class:`abc.collections.Sequence` protocol).
+
+   In addition to all standard :class:`list` methods the class
+   provides also methods like ``get()`` and ``post()`` for adding new
+   route definition.
+
+   .. decoratormethod:: get(path, *, allow_head=True, \
+                            name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering ``GET`` web-handler.
+
+      See :meth:`UrlDispatcher.add_get` for information about parameters.
+
+   .. decoratormethod:: post(path, *, name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering ``POST`` web-handler.
+
+      See :meth:`UrlDispatcher.add_post` for information about parameters.
+
+   .. decoratormethod:: head(path, *, name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering ``HEAD`` web-handler.
+
+      See :meth:`UrlDispatcher.add_head` for information about parameters.
+
+   .. decoratormethod:: put(path, *, name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering ``PUT`` web-handler.
+
+      See :meth:`UrlDispatcher.add_put` for information about parameters.
+
+   .. decoratormethod:: patch(path, *, name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering ``PATCH`` web-handler.
+
+      See :meth:`UrlDispatcher.add_patch` for information about parameters.
+
+   .. decoratormethod:: delete(path, *, name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering ``DELETE`` web-handler.
+
+      See :meth:`UrlDispatcher.add_delete` for information about parameters.
+
+   .. decoratormethod:: route(method, path, *, name=None, expect_handler=None)
+
+      Add a new :class:`RouteDef` item for registering a web-handler
+      for arbitrary HTTP method.
+
+      See :meth:`UrlDispatcher.add_route` for information about parameters.
+
+   .. versionadded:: 2.3
 
 MatchInfo
 ^^^^^^^^^

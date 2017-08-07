@@ -199,7 +199,6 @@ Contents
 
 .. toctree::
 
-   migration
    client
    client_reference
    tutorial
@@ -214,8 +213,7 @@ Contents
    testing
    deployment
    faq
-   third_party
-   built_with
+   external
    essays
    contributing
    changes

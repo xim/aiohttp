@@ -17,6 +17,9 @@ Async http client/server framework
 .. image:: https://badge.fury.io/py/aiohttp.svg
     :target: https://badge.fury.io/py/aiohttp
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+    :target: https://gitter.im/aio-libs/Lobby
+    :alt: Chat on Gitter
 
 aiohttp 2.0 release!
 ====================
@@ -39,7 +42,7 @@ organization https://github.com/aio-libs
 
 With this amount of api changes we had to make backward incompatible
 changes. Please check this migration document
-http://aiohttp.readthedocs.io/en/latest/migration.html
+https://aiohttp.readthedocs.io/en/latest/migration_to_2xx.html
 
 Please report problems or annoyance with with api to
 https://github.com/aio-libs/aiohttp
@@ -135,6 +138,19 @@ Documentation
 =============
 
 https://aiohttp.readthedocs.io/
+
+External links
+==============
+
+* `Third party libraries
+  <http://aiohttp.readthedocs.io/en/latest/third_party.html>`_
+* `Built with aiohttp
+  <http://aiohttp.readthedocs.io/en/latest/built_with.html>`_
+* `Powered by aiohttp
+  <http://aiohttp.readthedocs.io/en/latest/powered_by.html>`_
+
+Feel free to make a Pull Request for adding your link to these pages!
+
 
 Communication channels
 ======================

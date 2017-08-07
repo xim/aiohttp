@@ -14,9 +14,9 @@ This page is a list of these tools.
 Please feel free to add your open sourced library if it's not enlisted
 yet by making Pull Request to https://github.com/aio-libs/aiohttp/
 
-- Q. Why do you might want to include your awesome library into the list?
+* Why do you might want to include your awesome library into the list?
 
-- A. Just because the list increases your library visibility. People
+* Just because the list increases your library visibility. People
   will have an easy way to find it.
 
 
@@ -99,7 +99,7 @@ Database drivers
 Others
 ------
 
-The list of libs which are exists but not enlisted in former categories.
+The list of libraries which are exists but not enlisted in former categories.
 
 They are may be perfect or not -- we don't know.
 
@@ -117,6 +117,12 @@ period ask to raise he status.
 
 - `aiohttp-swagger <https://github.com/cr0hn/aiohttp-swagger>`_
   Swagger API Documentation builder for aiohttp server.
+
+- `aiohttp-swaggerify <https://github.com/dchaplinsky/aiohttp_swaggerify>`_
+  Library to automatically generate swagger2.0 definition for aiohttp endpoints.
+
+- `aiohttp-validate <https://github.com/dchaplinsky/aiohttp_validate>`_
+  Simple library that helps you validate your API endpoints requests/responses with json schema.
 
 - `raven-aiohttp <https://github.com/getsentry/raven-aiohttp>`_ An
   aiohttp transport for raven-python (Sentry client).
@@ -188,3 +194,5 @@ period ask to raise he status.
 
 - `home-assistant <https://github.com/home-assistant/home-assistant>`_
   Open-source home automation platform running on Python 3.
+
+- `discord.py <https://github.com/Rapptz/discord.py>`_ Discord client library.

@@ -1,7 +1,7 @@
 .. _aiohttp-client:
 
-Client
-======
+Client Usage
+============
 
 .. module:: aiohttp
 
@@ -56,7 +56,7 @@ Any of session's request methods like `request`, `get`, `post` etc accept
 `json` parameter::
 
   async with aiohttp.ClientSession() as session:
-      async with session.post(json={'test': 'object})
+      async with session.post(json={'test': 'object'})
 
 
 By default session uses python's standard `json` module for serialization.
@@ -66,7 +66,7 @@ parameter::
   import ujson
 
   async with aiohttp.ClientSession(json_serialize=ujson.dumps) as session:
-      async with session.post(json={'test': 'object})
+      async with session.post(json={'test': 'object'})
 
 
 Passing Parameters In URLs
@@ -604,7 +604,7 @@ Response Headers
 ----------------
 
 We can view the server's response :attr:`ClientResponse.headers` using
-a :class:`CIMultiDictProxy`::
+a :class:`~multidict.CIMultiDictProxy`::
 
     >>> resp.headers
     {'ACCESS-CONTROL-ALLOW-ORIGIN': '*',
@@ -739,3 +739,35 @@ reading procedures::
 
    Timeout is cumulative time, it includes all operations like sending request,
    redirects, response parsing, consuming response, etc.
+
+
+Graceful Shutdown
+-----------------
+
+When ``ClientSession`` closes at the end of an ``async with`` block (or through a direct ``.close()`` call), the underlying connection remains open due to asyncio internal details. In practice, the underlying connection will close after a short while. However, if the event loop is stopped before the underlying connection is closed, an ``ResourceWarning: unclosed transport`` warning is emitted (when warnings are enabled).
+
+To avoid this situation, a small delay must be added before closing the event loop to allow any open underlying connections to close.
+
+For a ``ClientSession`` without SSL, a simple zero-sleep (``await asyncio.sleep(0)``) will suffice::
+
+    async def read_website():
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://example.org/') as response:
+                await response.read()
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(read_website())
+    # Zero-sleep to allow underlying connections to close
+    loop.run_until_complete(asyncio.sleep(0))
+    loop.close()
+
+For a ``ClientSession`` with SSL, the application must wait a short duration before closing::
+
+    ...
+    # Wait 250 ms for the underlying SSL connections to close
+    loop.run_until_complete(asyncio.sleep(0.250))
+    loop.close()
+    
+Note that the appropriate amount of time to wait will vary from application to application.
+
+All if this will eventually become obsolete when the asyncio internals are changed so that aiohttp itself can wait on the underlying connection to close. Please follow issue `#1925 <https://github.com/aio-libs/aiohttp/issues/1925>`_ for the progress on this.
