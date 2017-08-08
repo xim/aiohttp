@@ -126,12 +126,6 @@ class Application(MutableMapping):
 
             self._loop = loop
             self._on_loop_available.send(self)
-
-            # set loop debug
-            if self._debug is ...:
-                self._debug = loop.get_debug()
-
-            self._loop = loop
         return self._loop
 
     @property
@@ -158,6 +152,10 @@ class Application(MutableMapping):
 
     @property
     def debug(self):
+        # set loop debug
+        if self._debug is ...:
+            loop = self.loop
+            self._debug = loop.get_debug()
         return self._debug
 
     def _reg_subapp_signals(self, subapp):
